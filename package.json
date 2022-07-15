@@ -1,0 +1,21 @@
+{
+  "name": "camping",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "nodemon app.js"
+  },
+  "author": "Shubhankar Seth",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-async-errors": "^3.1.1",
+    "mongoose": "^6.4.4",
+    "node-schedule": "^2.1.0",
+    "nodemailer": "^6.7.7"
+  }
+}

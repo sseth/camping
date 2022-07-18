@@ -9,7 +9,7 @@ const runScraper = async (park) => {
   let { parkID, start, end, nights, jobID, lastNotif } = park;
   console.log('running', jobID);
   const execStr =
-    'python3 ./campsite-checker/camping.py' +
+    'python3 campsite-checker/camping.py' +
     ` --start-date ${start}` +
     ` --end-date ${end}` +
     ` --parks ${parkID}` +

@@ -29,7 +29,7 @@ const addPark = async (req, res, next) => {
   // run once (before scheduling job) to check for errors
   const sent = await runScraper(park);
   // [errors to watch out for: wrong python path, 404 from rec.gov]
-  const jobID = await createJob(park);
+  const jobID = await createJob(park.parkID);
   park.jobID = jobID;
   if (sent) park.lastNotif = sent;
   await park.save();
@@ -50,7 +50,7 @@ const updatePark = async (req, res) => {
   Object.assign(park, req.body);
   await park.validate();
   const sent = await runScraper(park);
-  const newJob = await createJob(park);
+  const newJob = await createJob(park.parkID);
   if (park.jobID in schedule.scheduledJobs) {
     // cancel old job
     console.log('removing old job:', park.jobID);

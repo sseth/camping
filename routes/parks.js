@@ -49,7 +49,8 @@ const updatePark = async (req, res) => {
   
   Object.assign(park, req.body);
   await park.validate();
-  const sent = await runScraper(park);
+  // TODO: disregard lastNotif on update -- need to test
+  const sent = await runScraper(park, true);
   const newJob = await createJob(park.parkID);
   if (park.jobID in schedule.scheduledJobs) {
     // cancel old job

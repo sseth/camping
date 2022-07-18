@@ -14,8 +14,8 @@ const sendEmail = async (parkID, sites) => {
 };
 
 const _getEmail = (parkID, sites) => {
-  const groundsURL = 'https://www.recreation.gov/camping/campgrounds/';
-  const sitesURL = 'https://www.recreation.gov/camping/campsites/';
+  const groundsURL = 'https://www.recreation.gov/camping/campgrounds';
+  const sitesURL = 'https://www.recreation.gov/camping/campsites';
   let text = `Park: ${groundsURL}/${parkID}\n`;
   for (const site in sites) {
     text += `    Site: ${sitesURL}/${site}\n`;

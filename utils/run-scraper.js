@@ -3,11 +3,11 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 const _exec = promisify(exec);
 
-const runScraper = async (park) => {
+const runScraper = async (park, update = false) => {
   // console.log('doing job');
   // TODO: find 
   let { parkID, start, end, nights, jobID, lastNotif } = park;
-  console.log('running', jobID);
+  console.log('running', update ? 'new job' : jobID || 'new job');
   const execStr =
     'python3 campsite-checker/camping.py' +
     ` --start-date ${start}` +
@@ -26,7 +26,7 @@ const runScraper = async (park) => {
     // TODO: need to fetch updated park from db
     const diffMinutes = Math.ceil((Date.now() - lastNotif) / (1000 * 60));
     // console.log('diffMinutes:', diffMinutes);
-    if (diffMinutes < 60) {
+    if (!update && diffMinutes < 60) {
       console.log(`Last email sent ${diffMinutes} minutes ago — delaying notification`);
       return null;
     }

@@ -1,3 +1,4 @@
+import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { createJob, runScraper } from '../utils/index.js';
 import Park from '../models/Park.js';
 import schedule from 'node-schedule';
@@ -5,30 +6,25 @@ import express from 'express';
 const router = express.Router();
 
 const test = async (req, res) => {
-  const job = schedule.scheduleJob('name', '*/1 * * * * *', () => {
-    console.log('test');
-  });
-  
-  setTimeout(() =>  {
-    // schedule.cancelJob('name')
-    const job2 = schedule.scheduleJob('name', '*/1 * * * * *', () => {
-    console.log('test2');
-  });
-  }, 5000);
-  // job.prependOnceListener('success', () => {
-  //   console.log('scheduled');
-  // });
+  console.log('test');
   res.send();
 };
 
 const addPark = async (req, res, next) => {
   // TODO: write custom errors for mongoose validation, 404s on parkIDs
   const park = new Park(req.body);
-  await park.validate();
+  await park.validate(); // duplicate key error not thrown here
+  // duplicate create request leads to the new job being scheduled under the same name
+  // which results in the old job being fired twice at its scheduled time
+  // (this gets fixed on restart)
+  // TODO: multiple jobs for different date ranges for each park + specific campsites
+
+  // temporary fix to prevent duplicate parks: TODO
+  const test = await Park.findOne({ parkID: park.parkID });
+  if (test) throw new BadRequestError(`${park.parkID} already added`);
 
   // run once (before scheduling job) to check for errors
   const sent = await runScraper(park);
-  // [errors to watch out for: wrong python path, 404 from rec.gov]
   const jobID = await createJob(park.parkID);
   park.jobID = jobID;
   if (sent) park.lastNotif = sent;
@@ -37,26 +33,26 @@ const addPark = async (req, res, next) => {
 };
 
 const deletePark = async (req, res) => {
-  const doc = await Park.findOne({ parkID: req.params.parkID });
-  if (!doc) throw new Error('not found');
+  const { parkID } = req.params;
+  const doc = await Park.findOne({ parkID });
+  if (!doc) throw new NotFoundError(`${parkID} not found`);
   const del = await doc.remove();
   res.json({ deleted: del.parkID });
 };
 
 const updatePark = async (req, res) => {
-  let park = await Park.findOne({ parkID: req.params.parkID });
-  if (!park) throw new Error('not found');
-  
+  const { parkID } = req.params;
+  let park = await Park.findOne({ parkID });
+  if (!park) throw new NotFoundError(`${parkID} not found`);
+
   Object.assign(park, req.body);
   await park.validate();
-  // TODO: disregard lastNotif on update -- need to test
   const sent = await runScraper(park, true);
-  const newJob = await createJob(park.parkID);
+  const newJob = await createJob(parkID);
   if (park.jobID in schedule.scheduledJobs) {
-    // cancel old job
-    console.log('removing old job:', park.jobID);
+    console.log(`[${parkID}] removing old job:`, park.jobID);
     const cancelled = schedule.cancelJob(park.jobID);
-    if (!cancelled) throw new Error('unable to cancel old job');
+    if (!cancelled) console.error('failed');
   }
   park.jobID = newJob;
   if (sent) park.lastNotif = sent;
@@ -66,7 +62,7 @@ const updatePark = async (req, res) => {
 };
 
 router.route('/').post(addPark);
-router.route('/:parkID').patch(updatePark).delete(deletePark);
+router.route('/:parkID').put(updatePark).delete(deletePark);
 router.route('/test').get(test);
 
 export default router;

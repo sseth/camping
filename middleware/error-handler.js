@@ -1,9 +1,24 @@
 const errorHandler = (err, req, res, next) => {
-  // TODO: send custom error message if the first test execution of the scraper
-  // (before a job is scheduled) fails: invalid park id or whatever
-  console.error('in error handler');
+  // console.error('in error handler');
   console.error(err);
-  res.status(500).json({ error: 'Something went wrong' });
-}
+  const error = {
+    status: err.statusCode || 500,
+    msg: err.message || 'Something went wrong',
+  };
+
+  if (err.name === 'ValidationError') {
+    error.status = 400;
+    // error.msg = Object.keys(err.errors)
+    //   .map((field) => `${field}: ${err.errors[field].message}`)
+    //   .join('; ');
+  }
+
+  if (err.stderr && err.stderr.includes('404')) {
+    error.status = 400;
+    error.msg = 'invalid parkID';
+  }
+
+  res.status(error.status).json({ error: error.msg });
+};
 
 export default errorHandler;

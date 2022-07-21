@@ -23,6 +23,7 @@ const park = mongoose.Schema({
   nights: {
     type: String,
     match: [/^\d{1,2}$/, 'invalid'],
+    default: '',
   },
   jobID: String,
   lastNotif: Date,

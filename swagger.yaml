@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: camping
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://aqueous-temple-20353.herokuapp.com
+  variables: {}
+- url: http://localhost:5000
+  variables: {}
+paths:
+  /parks/test:
+    get:
+      summary: test
+      operationId: test
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      tags:
+      - test
+  /parks:
+    post:
+      summary: Add park
+      description: Add a `nights` prop to look for n nights within the given date range (instead of availability from `start` to `end`)
+      operationId: Addpark
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateParkRequest'
+            example:
+              parkID: '232375'
+              start: '2022-07-31'
+              end: '2022-08-01'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    get:
+      summary: Get all parks
+      operationId: Getallparks
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+  /parks/{parkID}:
+    delete:
+      summary: Delete park
+      operationId: Deletepark
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    patch:
+      summary: Update park
+      description: 'Add `"nights": ""` to remove'
+      operationId: Updatepark
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateParkRequest'
+            example:
+              start: '2022-07-27'
+              end: '2022-07-28'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+    get:
+      summary: Get park
+      operationId: Getpark
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+components:
+  schemas:
+    UpdateParkRequest:
+      title: UpdateParkRequest
+      required:
+      - start
+      - end
+      type: object
+      properties:
+        start:
+          type: string
+        end:
+          type: string
+        nights:
+          type: number
+      example:
+        start: '2022-07-27'
+        end: '2022-07-28'
+    CreateParkRequest:
+      title: CreateParkRequest
+      required:
+      - start
+      - end
+      type: object
+      properties:
+        start:
+          type: string
+        end:
+          type: string
+        nights:
+          type: number
+      example:
+        parkID: '232375'
+        start: '2022-07-27'
+        end: '2022-07-28'
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+security:
+- basic: []

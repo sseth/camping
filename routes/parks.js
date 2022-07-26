@@ -1,6 +1,5 @@
 import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { createJob, runScraper } from '../utils/index.js';
-import auth from '../middleware/auth.js';
 import Park from '../models/Park.js';
 import schedule from 'node-schedule';
 import express from 'express';

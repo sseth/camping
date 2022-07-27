@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { createJob, runScraper } from '../utils/index.js';
-import Park from '../models/Park.js';
+import Park from '../models/park.js';
 import schedule from 'node-schedule';
 import express from 'express';
 const router = express.Router();

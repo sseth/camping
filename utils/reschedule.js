@@ -1,4 +1,4 @@
-import Park from "../models/Park.js";
+import Park from "../models/park.js";
 import createJob from "./create-job.js";
 
 const reschedule = async () => {

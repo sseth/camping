@@ -1,6 +1,7 @@
-import Park from '../models/Park.js';
+import Park from '../models/park.js';
 import schedule from 'node-schedule';
 import runScraper from './run-scraper.js';
+
 const createJob = async (parkID) => {
   console.log('scheduling job for', parkID);
   const job = schedule.scheduleJob('*/5 * * * *', async () => {

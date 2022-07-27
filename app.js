@@ -1,3 +1,4 @@
+import http from 'http';
 import cors from 'cors';
 import yaml from 'yamljs';
 import xss from 'xss-clean';
@@ -40,6 +41,11 @@ app.get('/', (req, res) =>
 
 app.use('/docs', swagger.serve, swagger.setup(swaggerDoc));
 
+app.get('/ping', (req, res) => {
+  console.log('ping');
+  res.send();
+});
+
 app.use(
   auth({
     users: { harsh: process.env.PASSWORD },
@@ -50,6 +56,10 @@ app.use(
 app.use('/parks', parks);
 
 app.use(errorHandler);
+
+setInterval(() => {
+  http.get('https://aqueous-temple-20353.herokuapp.com/ping');
+}, 540000);
 
 const start = async () => {
   try {
@@ -63,3 +73,9 @@ const start = async () => {
 };
 
 start();
+
+
+// TODO:
+// bull and redis?
+// add multiple jobs for different date ranges to one park
+// auto-delete: cancel job after start date, set status to expired in db

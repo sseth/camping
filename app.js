@@ -1,5 +1,5 @@
-import http from 'http';
 import cors from 'cors';
+import https from 'https';
 import yaml from 'yamljs';
 import xss from 'xss-clean';
 import dotenv from 'dotenv';
@@ -58,7 +58,7 @@ app.use('/parks', parks);
 app.use(errorHandler);
 
 setInterval(() => {
-  http.get('https://aqueous-temple-20353.herokuapp.com/ping');
+  https.get('https://aqueous-temple-20353.herokuapp.com/ping');
 }, 540000);
 
 const start = async () => {

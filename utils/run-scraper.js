@@ -7,17 +7,17 @@ const runScraper = async (data) => {
   let { parkID, jobID, start, end, nights, lastNotif } = data;
   const execStr =
     'python3 campsite-checker/camping.py' +
+    ' --json-output' +
+    ` --parks ${parkID}` +
     ` --start-date ${start}` +
     ` --end-date ${end}` +
-    ` --parks ${parkID}` +
-    `${nights ? ' --nights ' + nights : ''}` +
-    ' --json-output';
+    `${nights ? ' --nights ' + nights : ''}`;
   console.log(`[${jobID}] ${execStr}`);
 
   const { stdout } = await _exec(execStr);
   // TODO: add condition: if stdout not empty ???????
-  const res = JSON.parse(stdout);
-  if (Object.keys(res).length) {
+  const res = JSON.parse(stdout)[0];
+  if (Object.keys(res).includes('sites')) {
     // console.log(res);
     const diffMinutes = lastNotif
       ? Math.ceil((Date.now() - lastNotif) / (1000 * 60))
@@ -29,7 +29,7 @@ const runScraper = async (data) => {
       return null;
     }
     console.log(`[${jobID}] Sending email...`);
-    await sendEmail(parkID, res[parkID]);
+    await sendEmail(parkID, res['name'], res['sites']);
     return Date.now();
   }
 };

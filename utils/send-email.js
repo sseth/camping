@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-const sendEmail = async (parkID, sites) => {
+const sendEmail = async (parkID, name, sites) => {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -9,15 +9,15 @@ const sendEmail = async (parkID, sites) => {
     },
   });
 
-  let info = await transporter.sendMail(_getEmail(parkID, sites));
+  let info = await transporter.sendMail(_getEmail(parkID, name, sites));
   // console.log('Message sent: %s', info);
   if (info) console.log('sent');
 };
 
-const _getEmail = (parkID, sites) => {
+const _getEmail = (parkID, name, sites) => {
   const groundsURL = 'https://www.recreation.gov/camping/campgrounds';
   const sitesURL = 'https://www.recreation.gov/camping/campsites';
-  let text = `Park: ${groundsURL}/${parkID}\n`;
+  let text = `${name}: ${groundsURL}/${parkID}\n`;
   for (const site in sites) {
     text += `    Site: ${sitesURL}/${site}\n`;
     sites[site].forEach((ob) => {
@@ -27,7 +27,7 @@ const _getEmail = (parkID, sites) => {
   const mail = {
     from: `"Sasti Notification Service" <${process.env.GMAIL_USER}>`,
     to: process.env.USER_EMAIL,
-    subject: 'Campsite Available',
+    subject: `Campsite Available at ${name}`,
     text: text,
   };
   return mail;

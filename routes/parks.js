@@ -1,7 +1,6 @@
 import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { createJob, runScraper } from '../utils/index.js';
 import Park from '../models/park.js';
-import schedule from 'node-schedule';
 import express from 'express';
 const router = express.Router();
 
@@ -10,30 +9,42 @@ const test = async (req, res) => {
   res.send();
 };
 
+// not doing addDates
+// change this to update + upsert
 const addPark = async (req, res) => {
-  // TODO: write custom errors for mongoose validation, 404s on parkIDs
-  const park = new Park(req.body);
-  const parkID = park.parkID;
-  await park.validate(); // duplicate key error not thrown here
-  // duplicate create request leads to the new job being scheduled under the same name
-  // which results in the old job being fired twice at its scheduled time
-  // (this gets fixed on restart)
-  // TODO: multiple jobs for different date ranges for each park + specific campsites
+  const { parkID, start, end, nights } = req.body;
+  let park = await Park.findOne({ parkID });
+  if (park) {
+    throw new BadRequestError(`${parkID} already added`);
+    // TODO: update with additional dates? remove addDates?
+    // check if dates already added
+    // park.dates.push({ start, end, nights });
+    // await park.validate();
+    // ^need to test this
+    // run once to test
+    // schedule job
+    // await park.save();
+    // return res.json({ success: true });
+  }
 
-  // temporary fix to prevent duplicate parks: TODO
-  const test = await Park.findOne({ parkID });
-  if (test) throw new BadRequestError(`${parkID} already added`);
-
-  // run once (before scheduling job) to check for errors
-  const sent = await runScraper(park);
-  const jobID = await createJob(parkID);
-  park.jobID = jobID;
-  if (sent) park.lastNotif = sent;
+  park = new Park({ parkID, dates: [{ start, end, nights }] });
+  await park.validate();
+  // run once to check for errors
+  const dates = park.dates[0];
+  const sent = await runScraper({ parkID, start, end, nights });
+  await createJob(parkID, dates._id.toString());
+  if (sent) dates.lastNotif = sent; // TODO: test
   await park.save();
-  res.json({
-    success: true,
-    park: { parkID, start: park.start, end: park.end, nights: park.nights },
-  });
+  res.status(201).json({ success: true });
+};
+
+// TODO:
+// what happens if the last dates ob is removed?
+// will it mess with the reschedule script?
+// delete park if park.dates.length === 1?
+const removeDates = async (req, res) => {
+  const { parkID, dateID } = req.params;
+  res.send();
 };
 
 const deletePark = async (req, res) => {
@@ -44,48 +55,40 @@ const deletePark = async (req, res) => {
   res.json({ deleted: del.parkID });
 };
 
-const updatePark = async (req, res) => {
-  const { parkID } = req.params;
-  let park = await Park.findOne({ parkID });
-  if (!park) throw new NotFoundError(`${parkID} not found`);
-
-  Object.assign(park, req.body);
-  await park.validate();
-  const sent = await runScraper(park, true);
-  const newJob = await createJob(parkID);
-  if (park.jobID in schedule.scheduledJobs) {
-    console.log(`[${parkID}] removing old job:`, park.jobID);
-    const cancelled = schedule.cancelJob(park.jobID);
-    if (!cancelled) console.error('failed');
-  }
-  park.jobID = newJob;
-  if (sent) park.lastNotif = sent;
-
-  await park.save();
-  res.json({
-    success: true,
-    park: { parkID, start: park.start, end: park.end, nights: park.nights },
-  });
-};
-
+// TODO:
+// use a projection/aggregation to remove lastNotif from dates
+// test with multiple dates
+// send ids as `id` or `_id`?
 const getPark = async (req, res) => {
   const { parkID } = req.params;
   const park = await Park.findOne({ parkID });
   if (!park) throw new NotFoundError(`${parkID} not found`);
-  res.json({ park: { parkID, start: park.start, end: park.end, nights: park.nights } });
+  res.json({ park });
 };
 
+// TODO:
+// use a projection/aggregation to remove lastNotif from dates
+// nights only if defined
+// send ids as `id` or `_id`?
+// okay to send everything as is?
+// test
 const getAllParks = async (req, res) => {
   const temp = await Park.find({});
   const parks = temp.map((park) => {
-    const { parkID, start, end, nights } = park;
-    return { parkID, start, end, nights };
+    const dates = park.dates.map((ob) => ({
+      id: ob._id.toString(),
+      start: ob.start,
+      end: ob.end,
+      nights: ob.nights !== '' ? ob.nights : undefined,
+    }));
+    return { parkID: park.parkID, dates };
   });
-  res.json({ count: parks.length, parks })
-}
+  res.json({ count: parks.length, parks });
+};
 
 router.route('/').post(addPark).get(getAllParks);
 router.route('/test').get(test);
-router.route('/:parkID').patch(updatePark).delete(deletePark).get(getPark);
+router.route('/:parkID').delete(deletePark).get(getPark);
+router.route('/:parkID/:dateID').delete(removeDates);
 
 export default router;

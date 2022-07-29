@@ -12,7 +12,7 @@ import swagger from 'swagger-ui-express';
 import rateLimiter from 'express-rate-limit';
 import errorHandler from './middleware/error-handler.js';
 
-import parks from './routes/parks.js';
+import parksRouter from './routes/parks.js';
 import { reschedule } from './utils/index.js';
 
 const swaggerDoc = yaml.load('./swagger.yaml');
@@ -53,7 +53,7 @@ app.use(
   })
 );
 
-app.use('/parks', parks);
+app.use('/parks', parksRouter);
 
 app.use(errorHandler);
 
@@ -64,7 +64,6 @@ setInterval(() => {
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    // TODO: figure out rescheduling on restart
     await reschedule();
     app.listen(port, console.log(`Listening on port ${port}`));
   } catch (error) {
@@ -76,6 +75,18 @@ start();
 
 
 // TODO:
+// include 'stop notifs' url in emails
+// improve logging: 'running `jobID`' tells me nothing, just log python command or an abbreviated version
+// handle errors on receiving request with invalid json
 // bull and redis?
 // add multiple jobs for different date ranges to one park
+// date validation: past dates not accepted
 // auto-delete: cancel job after start date, set status to expired in db
+// add dates for specific sites
+
+// POST /parks – addPark with one set of date vars (with update?)
+// POST /parks/:id – addDates (with upsert?)
+// GET /parks – getAllParks
+// GET /parks/:id – getPark
+// DELETE /parks/:id – deletePark (cancel all jobs)
+// DELETE /parks/:parkID/:dateID – deleteDates (cancel job)

@@ -4,11 +4,11 @@ import createJob from "./create-job.js";
 const reschedule = async () => {
   // TODO: handle errors
   console.log('Rescheduling jobs');
-  const all = await Park.find({});
-  all.forEach(async (park) => {
-    const doc = await Park.findOne({ parkID: park.parkID });
-    doc.jobID = await createJob(park.parkID);
-    await doc.save();
+  const parks = await Park.find({});
+  parks.forEach((park) => {
+    park.dates.forEach(async (dates) => {
+      await createJob(park.parkID, dates._id.toString());
+    });
   });
 }
 

@@ -6,6 +6,10 @@ const errorHandler = (err, req, res, next) => {
     msg: err.message || 'Something went wrong',
   };
 
+  if (err.type && err.type === 'entity.parse.failed') {
+    error.msg = `Invalid JSON in request body`;
+  }
+
   if (err.name === 'ValidationError') {
     error.status = 400;
     // error.msg = Object.keys(err.errors)

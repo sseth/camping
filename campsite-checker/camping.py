@@ -252,15 +252,18 @@ def generate_human_output(
 
 
 def generate_json_output(info_by_park_id):
-    availabilities_by_park_id = {}
+    parks = []
     has_availabilities = False
     for park_id, info in info_by_park_id.items():
-        current, _, available_dates_by_site_id, _ = info
+        availabilities_by_park_id = {}
+        current, _, available_dates_by_site_id, name = info
+        availabilities_by_park_id["name"] = name
+        availabilities_by_park_id["parkID"] = park_id
         if current:
             has_availabilities = True
-            availabilities_by_park_id[park_id] = available_dates_by_site_id
-
-    return json.dumps(availabilities_by_park_id), has_availabilities
+            availabilities_by_park_id["sites"] = available_dates_by_site_id
+        parks.append(availabilities_by_park_id)
+    return json.dumps(parks), has_availabilities
 
 
 def main(parks, json_output=False):

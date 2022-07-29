@@ -1,15 +1,7 @@
 import mongoose from 'mongoose';
 import schedule from 'node-schedule';
 
-
-const park = mongoose.Schema({
-  parkID: {
-    type: String,
-    required: [true, 'Please provide a campground ID'],
-    match: [/^\d{6}$/, 'invalid'],
-    unique: true,
-    immutable: true,
-  },
+const dateRange = new mongoose.Schema({
   start: {
     type: String,
     required: [true, 'Please provide a start date'],
@@ -25,14 +17,24 @@ const park = mongoose.Schema({
     match: [/^\d{1,2}$/, 'invalid'],
     default: '',
   },
-  jobID: String,
   lastNotif: Date,
 });
 
-park.pre('remove', function (next) {
-  // console.log('in pre delete hook:', this);
-  console.log(`deleting ${this.jobID}`);
-  const deleted = schedule.cancelJob(this.jobID);
+const park = new mongoose.Schema({
+  parkID: {
+    type: String,
+    required: [true, 'Please provide a campground ID'],
+    match: [/^\d{6}$/, 'invalid'],
+    unique: true,
+    immutable: true,
+  },
+  dates: [dateRange],
+});
+
+// TODO: test
+dateRange.pre('remove', function (next) {
+  console.log(`deleting job ${this._id} (park ${this.parent().parkID})`);
+  const deleted = schedule.cancelJob(this._id.toString());
   if (!deleted) throw new Error('delete unsuccessful');
   next();
 });

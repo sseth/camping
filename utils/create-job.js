@@ -2,25 +2,30 @@ import Park from '../models/park.js';
 import schedule from 'node-schedule';
 import runScraper from './run-scraper.js';
 
-const createJob = async (parkID) => {
+const createJob = async (parkID, jobID) => {
   console.log('scheduling job for', parkID);
-  const job = schedule.scheduleJob('*/5 * * * *', async () => {
+  const job = schedule.scheduleJob(jobID, '*/1 * * * *', async () => {
     const park = await Park.findOne({ parkID });
-    const sent = await runScraper(park);
+    const dates = park.dates.id(jobID);
+    const { start, end, nights, lastNotif } = dates;
+    const sent = await runScraper({
+      parkID,
+      jobID,
+      start,
+      end,
+      nights,
+      lastNotif,
+    });
     if (sent) {
-      park.lastNotif = sent;
+      dates.lastNotif = sent;
       await park.save();
     }
   });
-
-  // save only if job is successfully scheduled
+  
   if (!job) throw new Error('could not schedule job, try again');
   job.addListener('error', (error) => {
     console.error(error);
-    // TODO: cancel job?
   });
-  
-  return job.name;
 };
 
 export default createJob;

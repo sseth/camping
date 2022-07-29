@@ -10,7 +10,8 @@ const sendEmail = async (parkID, sites) => {
   });
 
   let info = await transporter.sendMail(_getEmail(parkID, sites));
-  console.log('Message sent: %s', info);
+  // console.log('Message sent: %s', info);
+  if (info) console.log('sent');
 };
 
 const _getEmail = (parkID, sites) => {

@@ -22,6 +22,15 @@ const errorHandler = (err, req, res, next) => {
     error.msg = 'invalid parkID';
   }
 
+  if (err.stderr && err.stderr.includes('Not a valid date')) {
+    error.status = 400;
+    error.msg = `invalid ${
+      err.stderr.includes('error: argument --start-date')
+        ? 'start date'
+        : 'end date'
+    }`;
+  }
+
   res.status(error.status).json({ error: error.msg });
 };
 

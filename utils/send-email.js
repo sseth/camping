@@ -28,7 +28,7 @@ const _getEmail = (parkID, name, sites) => {
     from: `"Sasti Notification Service" <${process.env.GMAIL_USER}>`,
     to: process.env.USER_EMAIL,
     subject: `Campsite Available at ${name}`,
-    text: text,
+    text
   };
   return mail;
 };

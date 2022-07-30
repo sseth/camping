@@ -9,9 +9,26 @@ const test = async (req, res) => {
   res.send();
 };
 
-// not doing addDates
-// change this to update + upsert
+// Adds a park or updates it with a new set of dates
 const addPark = async (req, res) => {
+  let { parkID, start, end, nights } = req.body;
+  parkID = req.params.parkID ? req.params.parkID : parkID;
+  let park = await Park.findOne({ parkID });
+  if (!park) park = new Park({ parkID, dates: [] });
+  park.dates.push({ start, end, nights });
+  await park.validate();
+
+  const dates = park.dates[park.dates.length - 1];
+  const sent = await runScraper({ parkID, start, end, nights });
+  await createJob(parkID, dates._id.toString());
+  if (sent) dates.lastNotif = sent;
+  await park.save();
+  
+  res.status(201).json({ success: true });
+};
+
+/*
+  const addPark = async (req, res) => {
   const { parkID, start, end, nights } = req.body;
   let park = await Park.findOne({ parkID });
   if (park) {
@@ -36,7 +53,7 @@ const addPark = async (req, res) => {
   if (sent) dates.lastNotif = sent; // TODO: test
   await park.save();
   res.status(201).json({ success: true });
-};
+}; */
 
 // TODO:
 // what happens if the last dates ob is removed?
@@ -88,7 +105,7 @@ const getAllParks = async (req, res) => {
 
 router.route('/').post(addPark).get(getAllParks);
 router.route('/test').get(test);
-router.route('/:parkID').delete(deletePark).get(getPark);
+router.route('/:parkID').post(addPark).delete(deletePark).get(getPark);
 router.route('/:parkID/:dateID').delete(removeDates);
 
 export default router;

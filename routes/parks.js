@@ -4,15 +4,13 @@ import Park from '../models/park.js';
 import express from 'express';
 const router = express.Router();
 
-const test = async (req, res) => {
-  console.log('test');
-  res.send();
-};
-
 // Adds a park or updates it with a new set of dates
+// TODO: bunch of bs if a request for the same park is sent
+// before another has been processed
 const addPark = async (req, res) => {
   let { parkID, start, end, nights } = req.body;
   parkID = req.params.parkID ? req.params.parkID : parkID;
+
   let park = await Park.findOne({ parkID });
   if (!park) park = new Park({ parkID, dates: [] });
   park.dates.push({ start, end, nights });
@@ -23,59 +21,32 @@ const addPark = async (req, res) => {
   await createJob(parkID, dates._id.toString());
   if (sent) dates.lastNotif = sent;
   await park.save();
-  
+
   res.status(201).json({ success: true });
 };
 
-/*
-  const addPark = async (req, res) => {
-  const { parkID, start, end, nights } = req.body;
-  let park = await Park.findOne({ parkID });
-  if (park) {
-    throw new BadRequestError(`${parkID} already added`);
-    // TODO: update with additional dates? remove addDates?
-    // check if dates already added
-    // park.dates.push({ start, end, nights });
-    // await park.validate();
-    // ^need to test this
-    // run once to test
-    // schedule job
-    // await park.save();
-    // return res.json({ success: true });
-  }
-
-  park = new Park({ parkID, dates: [{ start, end, nights }] });
-  await park.validate();
-  // run once to check for errors
-  const dates = park.dates[0];
-  const sent = await runScraper({ parkID, start, end, nights });
-  await createJob(parkID, dates._id.toString());
-  if (sent) dates.lastNotif = sent; // TODO: test
-  await park.save();
-  res.status(201).json({ success: true });
-}; */
-
-// TODO:
-// what happens if the last dates ob is removed?
-// will it mess with the reschedule script?
-// delete park if park.dates.length === 1?
 const removeDates = async (req, res) => {
   const { parkID, dateID } = req.params;
-  res.send();
+  let park = await Park.findOne({ parkID });
+  if (!park) throw new NotFoundError(`${parkID} not found`);
+  if (park.dates.length === 1) {
+    await park.remove();
+    return res.json({ deleted: parkID });
+  }
+  await park.dates.id(dateID).remove();
+  await park.save();
+  res.json({ deleted: dateID });
 };
 
 const deletePark = async (req, res) => {
   const { parkID } = req.params;
-  const doc = await Park.findOne({ parkID });
-  if (!doc) throw new NotFoundError(`${parkID} not found`);
-  const del = await doc.remove();
+  const park = await Park.findOne({ parkID });
+  if (!park) throw new NotFoundError(`${parkID} not found`);
+  const del = await park.remove();
   res.json({ deleted: del.parkID });
 };
 
-// TODO:
-// use a projection/aggregation to remove lastNotif from dates
-// test with multiple dates
-// send ids as `id` or `_id`?
+// remove lastNotif from dates?
 const getPark = async (req, res) => {
   const { parkID } = req.params;
   const park = await Park.findOne({ parkID });
@@ -83,15 +54,10 @@ const getPark = async (req, res) => {
   res.json({ park });
 };
 
-// TODO:
-// use a projection/aggregation to remove lastNotif from dates
-// nights only if defined
-// send ids as `id` or `_id`?
-// okay to send everything as is?
-// test
 const getAllParks = async (req, res) => {
-  const temp = await Park.find({});
-  const parks = temp.map((park) => {
+  const parks = await Park.find({});
+  /*
+    const parks = temp.map((park) => {
     const dates = park.dates.map((ob) => ({
       id: ob._id.toString(),
       start: ob.start,
@@ -100,11 +66,11 @@ const getAllParks = async (req, res) => {
     }));
     return { parkID: park.parkID, dates };
   });
+  */
   res.json({ count: parks.length, parks });
 };
 
 router.route('/').post(addPark).get(getAllParks);
-router.route('/test').get(test);
 router.route('/:parkID').post(addPark).delete(deletePark).get(getPark);
 router.route('/:parkID/:dateID').delete(removeDates);
 

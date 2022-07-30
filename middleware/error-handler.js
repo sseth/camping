@@ -1,5 +1,4 @@
 const errorHandler = (err, req, res, next) => {
-  // console.error('in error handler');
   console.error(err);
   const error = {
     status: err.statusCode || 500,
@@ -12,9 +11,7 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError') {
     error.status = 400;
-    // error.msg = Object.keys(err.errors)
-    //   .map((field) => `${field}: ${err.errors[field].message}`)
-    //   .join('; ');
+    error.msg = Object.values(err.errors).map((e) => e.message);
   }
 
   if (err.stderr && err.stderr.includes('404')) {

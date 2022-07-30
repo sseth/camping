@@ -2,17 +2,17 @@ openapi: 3.0.0
 info:
   title: camping
   contact: {}
-  version: '1.0'
+  version: '2.0'
 servers:
 - url: https://aqueous-temple-20353.herokuapp.com
   variables: {}
 - url: http://localhost:5000
   variables: {}
 paths:
-  /parks/test:
+  /parks:
     get:
-      summary: test
-      operationId: test
+      summary: Get all parks
+      operationId: Getallparks
       parameters: []
       responses:
         '200':
@@ -20,8 +20,7 @@ paths:
           headers: {}
       deprecated: false
       tags:
-      - test
-  /parks:
+      - parks
     post:
       summary: Add park
       description: Add a `nights` prop to look for n nights within the given date range (instead of availability from `start` to `end`)
@@ -39,63 +38,13 @@ paths:
               end: '2022-08-01'
         required: true
       responses:
-        '200':
+        '201':
           description: ''
           headers: {}
       deprecated: false
-    get:
-      summary: Get all parks
-      operationId: Getallparks
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          headers: {}
-      deprecated: false
+      tags:
+      - parks
   /parks/{parkID}:
-    delete:
-      summary: Delete park
-      operationId: Deletepark
-      parameters:
-      - name: parkID
-        in: path
-        description: ''
-        required: true
-        style: simple
-        schema:
-          type: string
-      responses:
-        '200':
-          description: ''
-          headers: {}
-      deprecated: false
-    patch:
-      summary: Update park
-      description: 'Add `"nights": ""` to remove'
-      operationId: Updatepark
-      parameters:
-      - name: parkID
-        in: path
-        description: ''
-        required: true
-        style: simple
-        schema:
-          type: string
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateParkRequest'
-            example:
-              start: '2022-07-27'
-              end: '2022-07-28'
-        required: true
-      responses:
-        '200':
-          description: ''
-          headers: {}
-      deprecated: false
     get:
       summary: Get park
       operationId: Getpark
@@ -112,10 +61,84 @@ paths:
           description: ''
           headers: {}
       deprecated: false
+      tags:
+      - parks
+    post:
+      summary: Add dates
+      operationId: Updatepark
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDatesRequest'
+            example:
+              start: '2022-07-27'
+              end: '2022-07-28'
+        required: true
+      responses:
+        '201':
+          description: ''
+          headers: {}
+      deprecated: false
+      tags:
+      - parks
+    delete:
+      summary: Delete park
+      operationId: Deletepark
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      tags:
+      - parks
+  /parks/{parkID}/{dateID}:
+    delete:
+      summary: Delete dates
+      operationId: Deletedates
+      parameters:
+      - name: parkID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: dateID
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+      deprecated: false
+      tags:
+      - parks
 components:
   schemas:
-    UpdateParkRequest:
-      title: UpdateParkRequest
+    AddDatesRequest:
+      title: AddDatesRequest
       required:
       - start
       - end

@@ -36,7 +36,7 @@ const port = process.env.PORT || 5000;
 console.log(process.env.NODE_ENV);
 
 app.get('/', (req, res) =>
-  res.send('<h1>Camping v1</h1><a href="/docs">Docs</a>')
+  res.send('<h1>Camping v2</h1><a href="/docs">Docs</a>')
 );
 
 app.use('/docs', swagger.serve, swagger.setup(swaggerDoc));

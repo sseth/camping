@@ -80,6 +80,12 @@ def get_park_information(
                     and campsite_type != campsite_data["campsite_type"]
                 ):
                     continue
+                
+                # have added this to filter out day use sites - s
+                if (
+                    campsite_data["type_of_use"] != "Overnight"
+                ):
+                    continue
 
                 if (
                     len(campsite_ids) > 0

@@ -72,21 +72,3 @@ const start = async () => {
 };
 
 start();
-
-
-// TODO:
-// include 'stop notifs' url in emails
-// improve logging: 'running `jobID`' tells me nothing, just log python command or an abbreviated version
-// handle errors on receiving request with invalid json
-// bull and redis?
-// add multiple jobs for different date ranges to one park
-// date validation: past dates not accepted
-// auto-delete: cancel job after start date, set status to expired in db
-// add dates for specific sites
-
-// POST /parks – addPark with one set of date vars (with update?)
-// POST /parks/:id – addDates (with upsert?)
-// GET /parks – getAllParks
-// GET /parks/:id – getPark
-// DELETE /parks/:id – deletePark (cancel all jobs)
-// DELETE /parks/:parkID/:dateID – deleteDates (cancel job)

@@ -17,21 +17,26 @@ const runScraper = async (data) => {
   const { stdout } = await _exec(execStr);
   // TODO: add condition: if stdout not empty ???????
   const res = JSON.parse(stdout)[0];
+
+  const name = res['name']
+    .split(' ')
+    .map((word) => word[0] + word.slice(1).toLowerCase())
+    .join(' ');
+
+  const info = { name, sent: false };
+
   if (Object.keys(res).includes('sites')) {
-    // console.log(res);
     const diffMinutes = lastNotif
       ? Math.ceil((Date.now() - lastNotif) / (1000 * 60))
       : null;
-    if (!!diffMinutes && diffMinutes < 60) {
-      // console.log(
-      //   `Last email sent ${diffMinutes} minutes ago — delaying notification`
-      // );
-      return null;
+    if (!diffMinutes || diffMinutes >= 60) {
+      console.log(`[${jobID}] Sending email...`);
+      await sendEmail(parkID, name, res['sites']);
+      info.sent = Date.now();
     }
-    console.log(`[${jobID}] Sending email...`);
-    await sendEmail(parkID, res['name'], res['sites']);
-    return Date.now();
   }
+
+  return info;
 };
 
 export default runScraper;

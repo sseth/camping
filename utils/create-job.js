@@ -9,7 +9,7 @@ const createJob = async (parkID, jobID) => {
     const dates = park.dates.id(jobID);
     // TODO: if !dates throw error?
     const { start, end, nights, lastNotif } = dates;
-    const sent = await runScraper({
+    const { sent } = await runScraper({
       parkID,
       jobID,
       start,

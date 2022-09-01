@@ -28,7 +28,9 @@ const park = new mongoose.Schema({
     unique: true,
     immutable: true,
   },
+  name: String,
   dates: [dateRange],
+  thumbnailUrl: String, // TODO validation etc.
 });
 
 // TODO: add pre save hook to prevent adding duplicate date sets

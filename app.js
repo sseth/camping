@@ -53,6 +53,10 @@ app.use(
   })
 );
 
+app.get('/login', (req, res) => {
+  res.send();
+});
+
 app.use('/parks', parksRouter);
 
 app.use(errorHandler);

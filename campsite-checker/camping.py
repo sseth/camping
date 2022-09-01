@@ -81,7 +81,7 @@ def get_park_information(
                 ):
                     continue
                 
-                # have added this to filter out day use sites - s
+                # have added this to filter out day use sites -- s
                 if (
                     campsite_data["type_of_use"] != "Overnight"
                 ):
@@ -92,7 +92,7 @@ def get_park_information(
                     and int(campsite_data["campsite_id"]) not in campsite_ids
                 ):
                     continue
-
+                # just a.append(date) and remove available?
                 available.append(date)
             if available:
                 a += available
@@ -191,6 +191,10 @@ def consecutive_nights(available, nights):
 def check_park(
     park_id, start_date, end_date, campsite_type, campsite_ids=(), nights=None
 ):
+    # park_info = { siteID: [dates] } (e.g. { 85116: ['2022-09-08T00:00:00Z', ...], ... })
+    # want it to be { siteID: { name: [dates] } }
+    # or { name: { siteID: [dates] } }
+    # or [ { name: 'abc', siteID: '123', dates: [...] }, ... ] --s
     park_information = get_park_information(
         park_id, start_date, end_date, campsite_type, campsite_ids
     )

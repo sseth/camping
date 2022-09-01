@@ -2,7 +2,35 @@ import { BadRequestError, NotFoundError } from '../errors/index.js';
 import { createJob, runScraper } from '../utils/index.js';
 import Park from '../models/park.js';
 import express from 'express';
+import https from 'https';
+
 const router = express.Router();
+
+const sendRequest = (id) => {
+  return new Promise((resolve, reject) => {
+    https
+      .get(
+        'https://ridb.recreation.gov' +
+          `/api/v1/facilities/${id}/media` +
+          '?limit=50&offset=0',
+        { headers: { apikey: process.env.REC_GOV_API_KEY } },
+        (res) => {
+          let body = '';
+          res.on('data', (d) => (body += d));
+          res.on('end', () => resolve(JSON.parse(body)));
+        }
+      )
+      .on('error', (e) => reject(e));
+  });
+};
+
+const getThumbnail = async (id) => {
+  const data = await sendRequest(id);
+  if (!data) return null;
+  // console.log(data);
+  const thumb = data.RECDATA.find((img) => img.IsPreview);
+  return thumb ? thumb.URL : null;
+};
 
 // Adds a park or updates it with a new set of dates
 // TODO: bunch of bs if a request for the same park is sent
@@ -17,9 +45,11 @@ const addPark = async (req, res) => {
   await park.validate();
 
   const dates = park.dates[park.dates.length - 1];
-  const sent = await runScraper({ parkID, start, end, nights });
-  await createJob(parkID, dates._id.toString());
+  const { name, sent } = await runScraper({ parkID, start, end, nights });
   if (sent) dates.lastNotif = sent;
+  await createJob(parkID, dates._id.toString());
+  park.name = name;
+  park.thumbnailUrl = await getThumbnail(parkID);
   await park.save();
 
   res.status(201).json({ success: true });

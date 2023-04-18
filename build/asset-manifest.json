@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.js": "/static/js/main.c0b14f34.js",
+    "static/media/logo.png": "/static/media/logo.dbd986f2797b16214a92.png",
+    "static/media/image-unavailable.jpg": "/static/media/image-unavailable.9661d75de18cc1234cd8.jpg",
+    "static/media/gear-solid.svg": "/static/media/gear-solid.6d3051457e9cb43992ef14710d01e3ea.svg",
+    "static/media/trash-can.svg": "/static/media/trash-can.86f8f0b56545f081dcac23393f68d103.svg",
+    "static/media/unavailable.svg": "/static/media/unavailable.717f8cf016066a5bddd2532f997618ba.svg",
+    "index.html": "/index.html",
+    "main.c0b14f34.js.map": "/static/js/main.c0b14f34.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.c0b14f34.js"
+  ]
+}

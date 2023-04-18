@@ -31,7 +31,7 @@ const runScraper = async (data) => {
       : null;
     if (!diffMinutes || diffMinutes >= 60) {
       console.log(`[${jobID}] Sending email...`);
-      await sendEmail(parkID, name, res['sites']);
+      // await sendEmail(parkID, name, res['sites']); TODO
       info.sent = Date.now();
     }
   }

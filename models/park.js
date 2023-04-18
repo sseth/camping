@@ -37,8 +37,8 @@ const park = new mongoose.Schema({
 
 dateRange.pre('remove', function (next) {
   console.log(`deleting job ${this._id} (park ${this.parent().parkID})`);
-  const deleted = schedule.cancelJob(this._id.toString());
-  if (!deleted) throw new Error('delete unsuccessful');
+  // const deleted = schedule.cancelJob(this._id.toString());
+  // if (!deleted) throw new Error('delete unsuccessful'); TODO
   next();
 });
 

@@ -6,25 +6,25 @@ import https from 'https';
 
 const router = express.Router();
 
-const sendRequest = (id) => {
-  return new Promise((resolve, reject) => {
-    https
-      .get(
-        'https://ridb.recreation.gov' +
-          `/api/v1/facilities/${id}/media` +
-          '?limit=50&offset=0',
-        { headers: { apikey: process.env.REC_GOV_API_KEY } },
-        (res) => {
-          let body = '';
-          res.on('data', (d) => (body += d));
-          res.on('end', () => resolve(JSON.parse(body)));
-        }
-      )
-      .on('error', (e) => reject(e));
-  });
-};
-
 const getThumbnail = async (id) => {
+  const sendRequest = (id) => {
+    return new Promise((resolve, reject) => {
+      https
+        .get(
+          'https://ridb.recreation.gov' +
+            `/api/v1/facilities/${id}/media` +
+            '?limit=50&offset=0',
+          { headers: { apikey: process.env.REC_GOV_API_KEY } },
+          (res) => {
+            let body = '';
+            res.on('data', (d) => (body += d));
+            res.on('end', () => resolve(JSON.parse(body)));
+          }
+        )
+        .on('error', (e) => reject(e));
+    });
+  };
+  
   const data = await sendRequest(id);
   if (!data) return null;
   // console.log(data);
@@ -47,7 +47,7 @@ const addPark = async (req, res) => {
   const dates = park.dates[park.dates.length - 1];
   const { name, sent } = await runScraper({ parkID, start, end, nights });
   if (sent) dates.lastNotif = sent;
-  await createJob(parkID, dates._id.toString());
+  // await createJob(parkID, dates._id.toString()); TODO
   park.name = name;
   park.thumbnailUrl = await getThumbnail(parkID);
   await park.save();
